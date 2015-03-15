@@ -1,4 +1,4 @@
-package coursera.discreteoptimisation.knapsack;
+package dopt;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -15,9 +15,7 @@ public class KnapsackGreedy extends Knapsack {
 	}
 
 	public Result run(final Problem pr) throws URISyntaxException, IOException {
-		Result r = new Result();
-		r.points = new int[pr.count];
-		
+		Result r = new Result(pr.count);
 		Map<Double, Integer> m = Maps.newTreeMap();
 		for(int i = 0; i < pr.count; i++){
 			m.put((double)pr.values[i]/pr.weights[i], i);

@@ -1,8 +1,9 @@
-package coursera.discreteoptimisation.knapsack;
+package dopt;
 
 import static java.lang.Integer.parseInt;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -10,12 +11,18 @@ import java.nio.file.Paths;
 import com.google.common.base.Joiner;
 import com.google.common.primitives.Ints;
 
-public class Knapsack {
+public abstract class Knapsack {
+
+    abstract Result run(Problem pr) throws URISyntaxException, IOException;
 
 	static class Result {
 		int value;
 		int[] points;
 		static Joiner joiner = Joiner.on(" ");
+		
+		Result(int count){
+		    points = new int[count];
+		}
 	
 		@Override
 		public String toString() {
@@ -25,6 +32,7 @@ public class Knapsack {
 			return sb.toString();
 		}
 	}
+	
 	
 	static class Problem {
 		int[] weights = null;

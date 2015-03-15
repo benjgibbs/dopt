@@ -1,4 +1,4 @@
-package coursera.discreteoptimisation.knapsack;
+package dopt;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -9,7 +9,10 @@ import java.net.URISyntaxException;
 
 import org.junit.Test;
 
-import coursera.discreteoptimisation.knapsack.Knapsack.Problem;
+import dopt.Knapsack;
+import dopt.KnapsackDP;
+import dopt.KnapsackGreedy;
+import dopt.Knapsack.Problem;
 
 public class KnapsackTest {
 
@@ -45,7 +48,7 @@ public class KnapsackTest {
 	@Test
 	public void testFirstOnly() throws URISyntaxException, IOException {
 		KnapsackDP dp = new KnapsackDP();
-		Knapsack.Result res = dp.run(new Problem("resources/knapsack/first-only.txt"));
+		Knapsack.Result res = dp.run(new Problem("resources/knapsack/take-the-third.txt"));
 		System.out.println(res.toString());
 		assertThat(res.value, is(equalTo(3)));
 		assertThat(res.points, is(new int[]{0,0,1}));

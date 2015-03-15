@@ -1,24 +1,13 @@
-package coursera.discreteoptimisation.knapsack;
+package dopt;
 
 import static java.lang.Math.max;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-
-import com.google.common.collect.Lists;
 
 public class KnapsackDP extends Knapsack {
 
 	public static void main(String[] args) throws URISyntaxException, IOException {
-		Path check = Paths.get("calledwith.txt");
-		Files.write(check, Lists.newArrayList(args[0]), Charset.forName("UTF8"), StandardOpenOption.APPEND,
-				StandardOpenOption.CREATE);
-
 		final String filename = args[0];
 		final KnapsackDP runner = new KnapsackDP();
 		System.out.println(runner.run(new Problem(filename)));
@@ -55,10 +44,8 @@ public class KnapsackDP extends Knapsack {
 //
 //		System.out.println("- - - ");
 
-		Knapsack.Result r = new Knapsack.Result();
+		Knapsack.Result r = new Knapsack.Result(pr.count);
 		r.value = M[pr.count - 1][pr.capacity];
-		r.points = new int[pr.count];
-
 		int i = pr.count - 1;
 		int c = pr.capacity;
 		while (c > 0 && i >= 0) {
