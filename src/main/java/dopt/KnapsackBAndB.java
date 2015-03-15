@@ -12,6 +12,12 @@ import com.google.common.collect.TreeMultimap;
 
 public class KnapsackBAndB extends Knapsack {
 
+    public static void main(String[] args) throws URISyntaxException, IOException {
+        final String filename = args[0];
+        final KnapsackBAndB runner = new KnapsackBAndB();
+        System.out.println(runner.run(new Problem(filename)));
+    }
+    
     static class Item {
         Item(int idx, int weight, int value) {
             this.idx = idx;
@@ -32,8 +38,11 @@ public class KnapsackBAndB extends Knapsack {
         }
     }
 
-    Result calcBest(List<Item> items, int p, int capacity, double maxPossibleValue, double bestSeenValue, int capacityLeft) {
-        if(bestSeenValue > maxPossibleValue){
+    int capacity;
+    double bestSeenValue;
+    
+    Result calcBest(List<Item> items, int p, double maxPossibleValue, int capacityLeft) {
+        if(bestSeenValue > maxPossibleValue || capacityLeft <= 0){
             return new Result(capacity);
         }
         
@@ -55,20 +64,27 @@ public class KnapsackBAndB extends Knapsack {
             Result bestThisIter = null;
             if (capacityLeft >= itm.weight) {
                 
-                Result selected = calcBest(items, i + 1, capacity, maxPossibleValue, bestSoFar.value, capacityLeft - itm.weight);
+                Result selected = calcBest(items, i + 1, maxPossibleValue, capacityLeft - itm.weight);
                 selected.value += itm.value;
                 selected.points[itm.idx] = 1;
                 
-                Result dropped = calcBest(items, i + 1, capacity, maxPossibleValue - itm.value, bestSoFar.value, capacityLeft);
+                Result dropped = calcBest(items, i + 1, maxPossibleValue - itm.value, capacityLeft);
 
                 bestThisIter= (selected.value > dropped.value) ? selected : dropped;
                 
             } else {
-                bestThisIter = calcBest(items, i + 1, capacity, maxPossibleValue - itm.value, bestSoFar.value, capacityLeft);
+                bestThisIter = calcBest(items, i + 1, maxPossibleValue - itm.value, capacityLeft);
+            }
+            if((int)maxPossibleValue == bestThisIter.value){
+                return bestThisIter;
             }
             if(bestThisIter.value > bestSoFar.value){
                 bestSoFar = bestThisIter;
             }
+            if(bestSeenValue < bestSoFar.value){
+                bestSeenValue = bestSoFar.value;
+            }
+            
         }
         return bestSoFar;
     }
@@ -82,8 +98,9 @@ public class KnapsackBAndB extends Knapsack {
             items.add(new Item(i, pr.weights[i], pr.values[i]));
         }
         double maxValue = maxValuePossible(pr);
-
-        return calcBest(items, 0, pr.count, maxValue, 0.0, pr.capacity);
+        capacity = pr.count;
+                
+        return calcBest(items, 0, maxValue, pr.capacity);
     }
 
     private double maxValuePossible(Problem pr) {
