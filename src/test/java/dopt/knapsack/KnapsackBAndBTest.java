@@ -1,4 +1,4 @@
-package dopt;
+package dopt.knapsack;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
@@ -9,9 +9,9 @@ import java.net.URISyntaxException;
 
 import org.junit.Test;
 
-import dopt.Knapsack;
-import dopt.KnapsackBAndB;
-import dopt.Knapsack.Problem;
+import dopt.knapsack.Knapsack;
+import dopt.knapsack.KnapsackBAndB;
+import dopt.knapsack.Knapsack.Problem;
 
 public class KnapsackBAndBTest {
 

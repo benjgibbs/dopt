@@ -1,4 +1,4 @@
-package dopt;
+package dopt.knapsack;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

@@ -1,4 +1,4 @@
-package dopt;
+package dopt.knapsack;
 
 import static java.lang.Math.max;
 
