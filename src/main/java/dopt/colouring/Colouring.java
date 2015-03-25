@@ -6,19 +6,20 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Stream;
+import java.util.Random;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
 
 public class Colouring {
+	
+	Random rand = new Random();
 
 	static class Result {
 		public Result(int sz){
@@ -34,7 +35,7 @@ public class Colouring {
 		@Override
 		public String toString() {
 			StringBuilder builder = new StringBuilder();
-			builder.append(numColors).append(" 0").append("\r");
+			builder.append(numColors).append(" 0").append("\n");
 			Joiner joiner = Joiner.on(" ");
 			builder.append(joiner.join(colouring));
 			return builder.toString();
@@ -43,9 +44,9 @@ public class Colouring {
 	}
 
 	Result calculate(String path) throws NumberFormatException, IOException {
+		rand.setSeed(1);
 		
 		Multimap<Integer, Integer> graph = readGraph(path);
-		
 		
 		Multimap<Integer, Integer> order = TreeMultimap.create(Comparator.reverseOrder(), Comparator.naturalOrder());
 
@@ -54,7 +55,7 @@ public class Colouring {
 			order.put(size, key);
 		}
 
-		final int iters = 10;
+		final int iters = 25;
 
 		Result result = calculateResult(graph, order);
 		
@@ -64,18 +65,39 @@ public class Colouring {
 				result = r1;
 			}
 		}
+		
+		order = TreeMultimap.create();
+		for (Integer key : graph.keySet()) {
+			int size = graph.get(key).size();
+			order.put(size, key);
+		}
+
+		for (Integer key : graph.keySet()) {
+			int size = graph.get(key).size();
+			order.put(size, key);
+		}
+		
+		for(int i = 0; i < iters; i++){
+			Result r1 = calculateResult(graph, order);
+			if(r1.numColors < result.numColors){
+				result = r1;
+			}
+		}
+		
 		return result;
 	}
-
+	
+	
 	private Result calculateResult(Multimap<Integer, Integer> graph, Multimap<Integer, Integer> order) {
 		Result result = new Result(graph.keySet().size());
-		
-		Set<Integer> s = new HashSet<>();
-		for (Entry<Integer, Integer> e : order.entries()) {
-			int i = e.getValue();
-			s.add(i);
-			int nextColour = findMinColor(result,graph,i);
-			result.colouring.set(i,nextColour);
+	
+		for (Integer k : order.keySet()) {
+			List<Integer> list = Lists.newArrayList(order.get(k));
+			Collections.shuffle(list, rand);
+			for(Integer i : list){
+				int nextColour = findMinColor(result,graph,i);
+				result.colouring.set(i,nextColour);	
+			}
 		}
 
 		result.numColors = result.colouring.stream().reduce(0, (x,y) -> (x > y) ? x : y);
@@ -122,6 +144,6 @@ public class Colouring {
 
 	public static void main(String[] args) throws IOException {
 		Colouring c = new Colouring();
-		System.out.println(c.calculate("resources/colouring/gc_20_1"));
+		System.out.println(c.calculate(args[0]));
 	}
 }

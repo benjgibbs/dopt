@@ -18,7 +18,7 @@ import dopt.colouring.Colouring.Result;
 public class ColouringTest {
 
 	Colouring c = new Colouring();
-	
+
 	@Test
 	public void test_4_1() throws NumberFormatException, IOException {
 		Result result = c.calculate("resources/colouring/gc_4_1");
@@ -27,28 +27,42 @@ public class ColouringTest {
 	}
 
 	@Test
-	public void testOthers(){
+	public void testOthers() {
 		Path path = Paths.get("resources", "colouring");
-		List<String> failed = new ArrayList<>();
+		List<String> failedHigh = new ArrayList<>();
+		List<String> failedLow = new ArrayList<>();
 		List<String> ok = new ArrayList<>();
-		try(DirectoryStream<Path> ds = Files.newDirectoryStream(path)){
+		int okTotal = 0;
+		int highTotal = 0;	
+		int lowTotal = 0;	
+		try (DirectoryStream<Path> ds = Files.newDirectoryStream(path)) {
 			for (Path file : ds) {
 				Result result = c.calculate(file.toString());
-				//System.out.println(file.toString());
-				//System.out.println(result);
-				Path basename = file.getName(file.getNameCount()-1);
+				// System.out.println(file.toString());
+				// System.out.println(result);
+				Path basename = file.getName(file.getNameCount() - 1);
 				String expectStr = basename.toString().split("_")[2];
-				if(Integer.parseInt(expectStr) != result.numColors){
-					failed.add(file.toString());
+				
+				int expect = Integer.parseInt(expectStr); 
+				if ( expect < result.numColors) {
+					highTotal += result.numColors;
+					failedHigh.add(file.toString());
+				} else if ( expect > result.numColors){
+					lowTotal += result.numColors;
+					failedLow.add(file.toString());
 				} else {
+					okTotal += result.numColors;
 					ok.add(file.toString());
 				}
 			}
-		}catch(Exception e){
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("Ok: " + ok);
-		System.out.println("Failed: " + failed);
-		assertThat(failed.size(), equalTo(0));
+		
+		System.out.println("Ok (" + ok.size()+ "/"+ okTotal + "): " + ok);
+		System.out.println("TooHigh (" + failedHigh.size() +"/"+ highTotal+ "): " + failedHigh);
+		System.out.println("TooLow (" + failedLow.size() +"/"+ lowTotal+ "): " + failedLow);
+		assertThat(failedLow.size(), equalTo(0));
+		assertThat(failedHigh.size(), equalTo(0));
 	}
 }
