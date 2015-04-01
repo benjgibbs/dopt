@@ -92,7 +92,7 @@ public class TSP {
 			List<Integer> result = new ArrayList<>();
 			double distance = runIteration(points, distances, result);
 			if (distance < minDistance) {
-				System.out.println("Better: " + distance);
+				//System.out.println("Better: " + distance);
 				minDistance = distance;
 				bestResult.clear();
 				bestResult.addAll(result);
