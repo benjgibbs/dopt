@@ -1,6 +1,5 @@
 package dopt.tsp;
 
-import java.awt.Graphics;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -12,8 +11,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.Multimap;
@@ -65,11 +62,11 @@ public class TSP {
 	}
 
 	public static void main(String[] args) throws IOException {
-		System.out.println(args[0]);
 		TSP tsp = new TSP();
 		tsp.solve(args[0]);
-
 	}
+
+	private boolean print = false;
 
 	private void solve(String pathStr) throws NumberFormatException, IOException {
 		Path path = Paths.get(pathStr);
@@ -147,11 +144,13 @@ public class TSP {
 	}
 
 	private void printDistances(double[][] distances) {
-		for (int i = 0; i < distances.length; i++) {
-			for (int j = 0; j < distances[i].length; j++) {
-				System.out.printf("%.2f\t", distances[i][j]);
+		if (print ) {
+			for (int i = 0; i < distances.length; i++) {
+				for (int j = 0; j < distances[i].length; j++) {
+					System.out.printf("%.2f\t", distances[i][j]);
+				}
+				System.out.println();
 			}
-			System.out.println();
 		}
 	}
 

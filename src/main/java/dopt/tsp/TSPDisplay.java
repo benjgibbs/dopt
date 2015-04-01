@@ -17,6 +17,9 @@ public class TSPDisplay extends JPanel {
 	private double minX = Double.MAX_VALUE, maxX = Double.MIN_VALUE;
 	private double minY = Double.MAX_VALUE, maxY = Double.MIN_VALUE;
 
+	int[] xpos;
+	int[] ypos;
+
 	public TSPDisplay(List<Point> points, List<Integer> result) {
 		this.points = points;
 		this.result = result;
@@ -31,44 +34,49 @@ public class TSPDisplay extends JPanel {
 				minY = point.y;
 		}
 
+		xpos = new int[points.size()];
+		ypos = new int[points.size()];
 	}
 
 	@Override
 	public void paint(Graphics g) {
 		super.paint(g);
-		int m = 50;
-		int gh = g.getClipBounds().height - 2 * m;
-		int gw = g.getClipBounds().width - 2 * m;
+		int m = (int) (0.05 * g.getClipBounds().width);
+		int gh = g.getClipBounds().height - (2 * m);
+		int gw = g.getClipBounds().width - (2 * m);
+
 		double rh = maxY - minY;
 		double rw = maxX - minX;
 
-		double uh = gh/rh;
-		double uw = gw/rw;
-		int[] xpos = new int[points.size()];
-		int[] ypos = new int[points.size()];
+		double uh = gh / rh;
+		double uw = gw / rw;
+
 		for (Point point : points) {
-			xpos[point.id] =  m + (int) Math.round(point.x * uw);
-			ypos[point.id] = m + (int) Math.round(point.y * uh);
-			
-			g.drawString(Integer.toString(point.id), xpos[point.id]-5,ypos[point.id]-5);
+			xpos[point.id] = m + (int) Math.round((point.x - minX) * uw);
+			ypos[point.id] = m + (int) Math.round((point.y - minY) * uh);
+			g.setColor(Color.BLACK);
+			g.drawString(Integer.toString(point.id), xpos[point.id] - 5, ypos[point.id] - 5);
+			g.setColor(Color.RED);
+			g.fillOval(xpos[point.id]-3, ypos[point.id]-3, 6, 6);
 		}
-		
+
 		g.setColor(Color.RED);
+		
 		Integer last = null;
 		Integer first = null;
-		
+
 		for (Integer p : result) {
-			if(last!=null){
-				g.drawLine(xpos[last], ypos[last], xpos[p], ypos[p]);
-			} else {
+			if (last == null) {
 				first = p;
+			} else {
+				g.drawLine(xpos[last], ypos[last], xpos[p], ypos[p]);
 			}
 			last = p;
 		}
 		g.drawLine(xpos[last], ypos[last], xpos[first], ypos[first]);
 	}
-	
+
 	public Dimension getPreferredSize() {
-        return new Dimension(800,600);
-    }
+		return new Dimension(800, 600);
+	}
 }
