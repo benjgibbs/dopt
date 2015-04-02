@@ -99,7 +99,7 @@ public class TSP {
 			}
 		}
 
-		display(points, bestResult);
+		//display(points, bestResult);
 
 		System.out.printf("%f 0\n", minDistance);
 		Joiner joiner = Joiner.on(" ");
