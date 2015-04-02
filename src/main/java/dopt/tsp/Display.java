@@ -7,7 +7,7 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
-public class TSPDisplay extends JPanel {
+public class Display extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	private List<Point> points;
@@ -18,7 +18,7 @@ public class TSPDisplay extends JPanel {
 	int[] xpos;
 	int[] ypos;
 
-	public TSPDisplay(List<Point> points, List<Integer> result) {
+	public Display(List<Point> points, List<Integer> result) {
 		this.points = points;
 		this.result = result;
 		for (Point point : points) {

@@ -20,7 +20,7 @@ class Result {
 
 	void display() {
 		JFrame pane = new JFrame();
-		pane.add(new TSPDisplay(points, route));
+		pane.add(new Display(points, route));
 		pane.pack();
 		pane.setVisible(true);
 	}
