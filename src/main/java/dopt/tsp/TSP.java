@@ -17,9 +17,11 @@ import com.google.common.collect.TreeMultimap;
 
 public class TSP {
 
-	private static final int MAX_STEP = 5;
+	private static final int MAX_STEP = 2;
 
-	private static final int ITERATIONS = 100;
+	private static final int ITERATIONS = 1000;
+
+	private static final int MAX_FAIL = 5;
 
 	public static void main(String[] args) throws IOException {
 		TSP tsp = new TSP();
@@ -40,36 +42,95 @@ public class TSP {
 		double[][] distances = calculateDistances(points);
 		printDistances(distances);
 
-		List<Integer> bestRoute = new ArrayList<>();
-		double minDistance = Double.MAX_VALUE;
+		Result best = new Result(Double.MAX_VALUE, new ArrayList<>(), points);
 		for (int i = 0; i < ITERATIONS; i++) {
-			List<Integer> result = runIteration(points, distances);
-			double distance = calcDistance(distances, result);
-			
-			if (distance < minDistance) {
-				//System.out.println("Better: " + distance);
-				minDistance = distance;
-				bestRoute.clear();
-				bestRoute.addAll(result);
+			List<Integer> route = runIteration(points, distances);
+			double distance = calcDistance(distances, route);
+			int failCount = 0;
+			do {
+				failCount++;
+				Edge e = findLongest(distances, route);
+				int p1 = findClosest(distances, e.a, points.size());
+				if (p1 != e.b) {
+					List<Integer> newRoute = new ArrayList<>(points.size());
+					for (int pi = 0; pi < route.size(); pi++) {
+						int p = route.get(pi);
+						if (p == e.a) {
+							newRoute.add(e.a);
+							newRoute.add(p1);
+						} else if (p == e.b) {
+							newRoute.add(e.b);
+						} else if (p == p1) {
+							// skip
+						} else {
+							newRoute.add(p);
+						}
+					}
+					double newDistance = calcDistance(distances, newRoute);
+					if (newDistance < distance) {
+						// System.out.println("Saved: " +
+						// (distance-newDistance));
+						route = newRoute;
+						distance = newDistance;
+						failCount--;
+					}
+				}
+
+			} while (failCount < MAX_FAIL);
+
+			if (distance < best.distance) {
+				best = new Result(distance, route, points);
+				// best.display();
 			}
 		}
-		return new Result(minDistance,bestRoute, points);
+		return best;
 	}
-	
+
+	private int findClosest(double[][] distances, int a, int numPts) {
+		double minSoFar = Double.MAX_VALUE;
+		int minPos = -1;
+		for (int i = 0; i < numPts; i++) {
+			if (i == a)
+				continue;
+			double dist = getDistance(distances, a, i);
+			if (dist < minSoFar) {
+				minSoFar = dist;
+				minPos = i;
+			}
+		}
+		return minPos;
+	}
+
+	private Edge findLongest(double[][] distances, List<Integer> route) {
+		double longestSoFar = Double.MIN_VALUE;
+		int last = route.get(route.size() - 1);
+		Edge result = null;
+		for (int i : route) {
+			if (last != i) {
+				double dist = getDistance(distances, last, i);
+				if (dist > longestSoFar) {
+					longestSoFar = dist;
+					result = new Edge(last, i);
+				}
+			}
+		}
+		return result;
+	}
+
 	private List<Integer> runIteration(List<Point> points, double[][] distances) {
 		List<Integer> result = new ArrayList<>();
-		
+
 		Multimap<Double, Edge> ordering = sortDistances(distances);
 		Set<Integer> joined = new HashSet<>();
 		int last = rand.nextInt(points.size());
-		int stepSz = rand.nextInt(MAX_STEP)+1;
-		
+		int stepSz = rand.nextInt(MAX_STEP) + 1;
+
 		while (joined.size() < points.size()) {
 			ArrayList<Double> keySet = Lists.newArrayList(ordering.keySet());
-			for(int i = 0; i < keySet.size(); i+=stepSz){
+			for (int i = 0; i < keySet.size(); i += stepSz) {
 				List<Edge> orderedEdges = new ArrayList<>();
-				for(int j=0; j < stepSz; j++){
-					int idx = Math.min(i+j, keySet.size()-1);
+				for (int j = 0; j < stepSz; j++) {
+					int idx = Math.min(i + j, keySet.size() - 1);
 					orderedEdges.addAll(ordering.get(keySet.get(idx)));
 				}
 				Collections.shuffle(orderedEdges, rand);
@@ -90,26 +151,24 @@ public class TSP {
 		}
 		return result;
 	}
-	
-	private double calcDistance(double[][] distances, List<Integer> points){
+
+	private double calcDistance(double[][] distances, List<Integer> points) {
 		double result = 0.0;
-		int last = points.get(points.size()-1);
-		for(Integer i : points){
+		int last = points.get(points.size() - 1);
+		for (Integer i : points) {
 			result += getDistance(distances, i, last);
 			last = i;
 		}
 		return result;
 	}
-	
-	private double getDistance(double[][] distances, int a, int b){
+
+	private double getDistance(double[][] distances, int a, int b) {
 		if (a > b) {
 			return distances[a][b];
 		} else {
 			return distances[b][a];
 		}
 	}
-
-	
 
 	private Multimap<Double, Edge> sortDistances(double[][] distances) {
 		Multimap<Double, Edge> result = TreeMultimap.create();
