@@ -11,9 +11,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import javax.swing.JFrame;
-
-import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
@@ -22,63 +19,20 @@ public class TSP {
 
 	private static final int MAX_STEP = 5;
 
-	private static final int ITERATIONS = 1000;
-
-	static class Point {
-		final double x;
-		final double y;
-		final int id;
-
-		public Point(int id, double x, double y) {
-			this.id = id;
-			this.x = x;
-			this.y = y;
-		}
-
-		@Override
-		public String toString() {
-			return String.format("%d=(x:%f,y:%f)", id, x, y);
-		}
-	}
-
-	static class Edge implements Comparable<Edge> {
-		final int a;
-		final int b;
-
-		public Edge(int a, int b) {
-			this.a = a;
-			this.b = b;
-		}
-
-		@Override
-		public String toString() {
-			return String.format("(a:%d,b:%d)", a, b);
-		}
-
-		@Override
-		public int compareTo(Edge o) {
-			if (a > o.a)
-				return 1;
-			if (a < o.a)
-				return -1;
-			if (b > o.b)
-				return 1;
-			if (b < o.b)
-				return -1;
-			return 0;
-		}
-	}
+	private static final int ITERATIONS = 100;
 
 	public static void main(String[] args) throws IOException {
 		TSP tsp = new TSP();
-		tsp.solve(args[0]);
+		Result result = tsp.solve(args[0]);
+		result.display();
+		System.out.println(result);
 	}
 
 	private boolean print = false;
 
 	private static Random rand = new Random();
 
-	private void solve(String pathStr) throws NumberFormatException, IOException {
+	public Result solve(String pathStr) throws NumberFormatException, IOException {
 		rand.setSeed(1);
 		Path path = Paths.get(pathStr);
 
@@ -86,31 +40,27 @@ public class TSP {
 		double[][] distances = calculateDistances(points);
 		printDistances(distances);
 
-		List<Integer> bestResult = new ArrayList<>();
+		List<Integer> bestRoute = new ArrayList<>();
 		double minDistance = Double.MAX_VALUE;
 		for (int i = 0; i < ITERATIONS; i++) {
-			List<Integer> result = new ArrayList<>();
-			double distance = runIteration(points, distances, result);
+			List<Integer> result = runIteration(points, distances);
+			double distance = calcDistance(distances, result);
+			
 			if (distance < minDistance) {
 				//System.out.println("Better: " + distance);
 				minDistance = distance;
-				bestResult.clear();
-				bestResult.addAll(result);
+				bestRoute.clear();
+				bestRoute.addAll(result);
 			}
 		}
-
-		//display(points, bestResult);
-
-		System.out.printf("%f 0\n", minDistance);
-		Joiner joiner = Joiner.on(" ");
-		System.out.println(joiner.join(bestResult));
-
+		return new Result(minDistance,bestRoute, points);
 	}
-
-	private double runIteration(List<Point> points, double[][] distances, List<Integer> result) {
+	
+	private List<Integer> runIteration(List<Point> points, double[][] distances) {
+		List<Integer> result = new ArrayList<>();
+		
 		Multimap<Double, Edge> ordering = sortDistances(distances);
 		Set<Integer> joined = new HashSet<>();
-		double distance = 0.0;
 		int last = rand.nextInt(points.size());
 		int stepSz = rand.nextInt(MAX_STEP)+1;
 		
@@ -125,13 +75,11 @@ public class TSP {
 				Collections.shuffle(orderedEdges, rand);
 				for (Edge edge : orderedEdges) {
 					if (edge.a == last && !joined.contains(edge.b)) {
-						distance += getDistance(distances, edge.a, edge.b);
 						result.add(edge.b);
 						joined.add(edge.b);
 						last = edge.b;
 						break;
 					} else if (edge.b == last && !joined.contains(edge.a)) {
-						distance += getDistance(distances, edge.a, edge.b);
 						result.add(edge.a);
 						joined.add(edge.a);
 						last = edge.a;
@@ -140,7 +88,17 @@ public class TSP {
 				}
 			}
 		}
-		return distance;
+		return result;
+	}
+	
+	private double calcDistance(double[][] distances, List<Integer> points){
+		double result = 0.0;
+		int last = points.get(points.size()-1);
+		for(Integer i : points){
+			result += getDistance(distances, i, last);
+			last = i;
+		}
+		return result;
 	}
 	
 	private double getDistance(double[][] distances, int a, int b){
@@ -151,12 +109,7 @@ public class TSP {
 		}
 	}
 
-	private void display(final List<Point> points, final List<Integer> result) {
-		JFrame pane = new JFrame();
-		pane.add(new TSPDisplay(points, result));
-		pane.pack();
-		pane.setVisible(true);
-	}
+	
 
 	private Multimap<Double, Edge> sortDistances(double[][] distances) {
 		Multimap<Double, Edge> result = TreeMultimap.create();

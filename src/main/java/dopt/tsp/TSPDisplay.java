@@ -7,8 +7,6 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
-import dopt.tsp.TSP.Point;
-
 public class TSPDisplay extends JPanel {
 
 	private static final long serialVersionUID = 1L;
