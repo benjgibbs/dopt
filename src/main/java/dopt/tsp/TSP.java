@@ -17,11 +17,11 @@ import com.google.common.collect.TreeMultimap;
 
 public class TSP {
 
-	private static final int MAX_STEP = 2;
+	private static final int MAX_STEP = 20;
 
-	private static final int ITERATIONS = 1000;
+	private static final int ITERATIONS = 10000;
 
-	private static final int MAX_FAIL = 5;
+	private static final int MAX_FAIL = 10;
 
 	public static void main(String[] args) throws IOException {
 		TSP tsp = new TSP();
